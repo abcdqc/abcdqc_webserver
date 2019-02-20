@@ -1,0 +1,9 @@
+cd ~/abcdqc
+FLASK_APP=app.py flask run
+
+cd ~/abcdqc/src/abcdqc-client
+npm start
+
+npm run build
+serve -s build 
+sudo ~ivanovgp/node-v10.15.1-linux-x64/bin/node ./node_modules/.bin/serve -s build -l 80
