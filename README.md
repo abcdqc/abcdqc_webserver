@@ -50,6 +50,7 @@ Examples file names:
  * modalityT1-sexM-age8-scannerSiemens
 
 Example JSON structure:
+
     {
         efc: { // IQMs at the top level
             mean: .55; // general stats
