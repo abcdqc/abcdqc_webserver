@@ -10,10 +10,10 @@ import { area, curveCatmullRom } from 'd3-shape'
 export default class Chart extends Component {
     componentDidMount() {
         // set the dimensions and margins of the graph
-        const margin = {top: 10, right: 30, bottom: 30, left: 40},
-        width = 460 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
-    
+        const margin = {top: 10, right: 30, bottom: 30, left: 40};
+        const width = 460 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+
         // D3 Code to create the chart
         // using this._rootNode as container
         let svg = select(".graph-container")
@@ -26,32 +26,36 @@ export default class Chart extends Component {
 
         // Read the data and compute summary statistics for each specie
         let data = csvParse(this.getData());
-            // Build and Show the Y scale
-            var y = scaleLinear()
-                .domain([ 3.5,8 ])          // Note that here the Y scale is set manually
-                .range([height, 0]);
-            svg.append("g").call( axisLeft(y) )
+        // Build and Show the Y scale
+        var y = scaleLinear()
+            .domain([3.5, 8])          // Note that here the Y scale is set manually
+            .range([height, 0]);
+        svg.append("g").call(axisLeft(y));
 
-            // Features of density estimate
-            var kde = this.kernelDensityEstimator(this.kernelEpanechnikov(.2), y.ticks(50))
-            // Compute the binning for each group of the dataset
-            var sumstat = nest()  // nest function allows to group the calculation per level of a factor
-                .key(function(d) { return d.Species;})
-                .rollup(function(d) {   // For each key..
-                    let input = d.map(function(g) { return g.Sepal_Length;});    // Keep the variable called Sepal_Length
-                    let density = kde(input);   // And compute the binning on it.
-                    return(density);
-                })
-                .entries(data);
+        // Features of density estimate
+        var kde = this.kernelDensityEstimator(this.kernelEpanechnikov(.2), y.ticks(50));
+        // Compute the binning for each group of the dataset
+        var sumstat = nest()  // nest function allows to group the calculation per level of a factor
+            .key(function (d) {
+                return d.Species;
+            })
+            .rollup(function (d) {   // For each key..
+                let input = d.map(function (g) {
+                    return g.Sepal_Length;
+                });    // Keep the variable called Sepal_Length
+                let density = kde(input);   // And compute the binning on it.
+                return (density);
+            })
+            .entries(data);
 
-            sumstat[0].extremes = [4.0, 6.5];
-            sumstat[0].quartiles = [4.5, 5.5];
-            sumstat[1].extremes = [4.5, 7.7];
-            sumstat[1].quartiles = [5.5, 6.5];
-            sumstat[2].extremes = [4.0, 8.0];
-            sumstat[2].quartiles = [6.0, 7.2];
+        sumstat[0].extremes = [4.0, 6.5];
+        sumstat[0].quartiles = [4.5, 5.5];
+        sumstat[1].extremes = [4.5, 7.7];
+        sumstat[1].quartiles = [5.5, 6.5];
+        sumstat[2].extremes = [4.0, 8.0];
+        sumstat[2].quartiles = [6.0, 7.2];
 
-            this.originalPlot(svg, width, height, sumstat, y);
+        this.originalPlot(svg, width, height, sumstat, y);
     }
 
     shouldComponentUpdate() {
@@ -64,114 +68,138 @@ export default class Chart extends Component {
 
     render() {
         return (
-            <div>
-            <div className="graph-container" ref={this._setRef.bind(this)} />
-            Add D3 here
-            </div>
+            <div className="graph-container" ref={this._setRef.bind(this)}/>
         );
     }
 
     getViolinXAxis(sumstat, x) {
         // What is the biggest value that the density estimate reach?
         let maxNum = 0;
-        for ( let i in sumstat ) {
+        for (let i in sumstat) {
             let allBins = sumstat[i].value;
-            let kdeValues = allBins.map((a) => {return a[1]});
+            let kdeValues = allBins.map((a) => {
+                return a[1]
+            });
             let biggest = max(kdeValues);
-            if (biggest > maxNum) { maxNum = biggest }
+            if (biggest > maxNum) {
+                maxNum = biggest
+            }
         }
-    
+
         // The maximum width of a violin must be x.bandwidth = the width dedicated to a group
         let xNum = scaleLinear()
             .range([0, x.bandwidth()])
-            .domain([-maxNum,maxNum]);
+            .domain([-maxNum, maxNum]);
         return xNum;
     }
-    
+
     originalPlot(svg, width, height, sumstat, y) {
         // Build and Show the X scale. It is a band scale like for a boxplot: each group has an dedicated RANGE on the axis. This range has a length of x.bandwidth
         var x = scaleBand()
-            .range([ 0, width ])
+            .range([0, width])
             .domain(["setosa", "versicolor", "virginica"])
-            .padding(0.05)     // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
+            .padding(0.05);     // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
             .call(axisBottom(x));
-    
+
         var xNum = this.getViolinXAxis(sumstat, x);
-    
+
         var g = svg
             .selectAll("myViolin")
             .data(sumstat)
             .enter()        // So now we are working group per group
             .append("g")
-                .attr("transform", function(d){ return("translate(" + x(d.key) +" ,0)") } ); // Translation on the right to be at the group position
-    
+                .attr("transform", d => ("translate(" + x(d.key) + " ,0)")); // Translation on the right to be at the group position
+
         // Right half of violin
         g
             .append("path")
             .attr("class", "rightViolin")
-            .datum(function(d){ return(d.value)})     // So now we are working density per density
+            .datum(d => d.value)     // So now we are working density per density
             .style("stroke", "none")
-            .style("fill","#69b3a2")
+            .style("fill", "#69b3a2")
             .attr("d", area()
                 // .x0(function(d){ return(xNum(-d[1])) } )
                 .x0(xNum(0))
-                .x1(function(d){ return(xNum(d[1])) } )
-                .y(function(d){ return(y(d[0])) } )
+                .x1(d => xNum(d[1]))
+                .y(d => y(d[0]))
                 .curve(curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
             );
         // Left half of violin
         g
             .append("path")
             .attr("class", "leftViolin")
-            .datum(function(d){ return(d.value)})
+            .datum(function (d) {
+                return (d.value)
+            })
             .style("stroke", "none")
-            .style("fill","red")
+            .style("fill", "red")
             .attr("d", area()
-                .x0(function(d){ return(xNum(-d[1]/2)) } )
-                .x1(function(d){ return(xNum(0)) } )
-                .y(function(d){ return(y(d[0])) } )
+                .x0(function (d) {
+                    return (xNum(-d[1] / 2))
+                })
+                .x1(function (d) {
+                    return (xNum(0))
+                })
+                .y(function (d) {
+                    return (y(d[0]))
+                })
                 .curve(curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
             );
         // Vertical whiskers
         g
             .append("line")
             // .datum(function(d){ return(d.extremes)})
-            .attr("y1", function(d) {return y(d.extremes[0])})
-            .attr("y2", function(d) {return y(d.quartiles[0])})
+            .attr("y1", function (d) {
+                return y(d.extremes[0])
+            })
+            .attr("y2", function (d) {
+                return y(d.quartiles[0])
+            })
             .attr("x1", xNum(0))
             .attr("x2", xNum(0))
             .style("stroke", "black");
         g
             .append("line")
-            .attr("y1", function(d) {return y(d.extremes[1])})
-            .attr("y2", function(d) {return y(d.quartiles[1])})
+            .attr("y1", function (d) {
+                return y(d.extremes[1])
+            })
+            .attr("y2", function (d) {
+                return y(d.quartiles[1])
+            })
             .attr("x1", xNum(0))
             .attr("x2", xNum(0))
             .style("stroke", "black");
         // Boxes
         g
             .append("rect")
-            .attr("x", x.bandwidth()*.25)
-            .attr("y", function(d) {return y(d.quartiles[1])})
-            .attr("width", x.bandwidth()*.5)
-            .attr("height", function(d) {return y(d.quartiles[0])-y(d.quartiles[1])})
+            .attr("x", x.bandwidth() * .25)
+            .attr("y", function (d) {
+                return y(d.quartiles[1])
+            })
+            .attr("width", x.bandwidth() * .5)
+            .attr("height", function (d) {
+                return y(d.quartiles[0]) - y(d.quartiles[1])
+            })
             .style("stroke", "black")
             .style("fill", "none")
-        
+
     }
-    
+
     // 2 functions needed for kernel density estimate
     kernelDensityEstimator(kernel, X) {
-        return function(V) {
-            return X.map(function(x) {
-                return [x, mean(V, function(v) { return kernel(x - v); })];
+        return function (V) {
+            return X.map(function (x) {
+                return [x, mean(V, function (v) {
+                    return kernel(x - v);
+                })];
             });
         };
     }
+
     kernelEpanechnikov(k) {
-        return function(v) {
+        return function (v) {
             return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
         };
     }
