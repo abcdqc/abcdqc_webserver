@@ -5,7 +5,9 @@ This project is composed of three github repos ([abcdqc_webserver](https://githu
 
 ![ABCDQC Project Schematic](https://raw.githubusercontent.com/abcdqc/abcdqc_batchserver/master/ABCDQCflowchart.png "Project Schematic")
 
-A webserver that presents visualizations of the ABCD QC Fast Track data.
+This repo contain the code running the NGNIX webserver on the AWS client that serves the interactive visualizations from http://abcdqc.org
+
+Install instructions are being written:
 
 Develop on Web Client (requires node)
 ----------------------
