@@ -2,8 +2,9 @@ This is one of the projects from the NCBI collaborative biodata science hackatho
 
 This project is composed of three github repos ([abcdqc_webserver](https://github.com/abcdqc/abcdqc_webserver), [abcdqc_batchserver](https://github.com/abcdqc/abcdqc_batchserver), [abcdqc_hcp_notebooks](https://github.com/abcdqc/abcdqc_hpc_notebooks)) that work on two AWS instances and utilize the NIH high performance computing cluster. 
 
-A webserver that presents visualizations of the ABCD QC Fast Track data.
+![ABCDQC Project Schematic](https://raw.githubusercontent.com/abcdqc/abcdqc_batchserver/master/ABCDQCflowchart.png "Project Schematic")
 
+A webserver that presents visualizations of the ABCD QC Fast Track data.
 
 Develop on Web Client (requires node)
 ----------------------
