@@ -16,7 +16,7 @@ export default class Chart extends Component {
     
         // D3 Code to create the chart
         // using this._rootNode as container
-        let svg = select(".graph-container")
+        let svg = select(this._rootNode)
             .append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
@@ -66,7 +66,6 @@ export default class Chart extends Component {
         return (
             <div>
             <div className="graph-container" ref={this._setRef.bind(this)} />
-            Add D3 here
             </div>
         );
     }
@@ -100,6 +99,9 @@ export default class Chart extends Component {
     
         var xNum = this.getViolinXAxis(sumstat, x);
     
+        const boxPlotX1 = x.bandwidth()*.25,
+            boxPlotX2 = x.bandwidth()*.75,
+            boxPlotWidth = boxPlotX2 - boxPlotX1;
         var g = svg
             .selectAll("myViolin")
             .data(sumstat)
@@ -108,8 +110,7 @@ export default class Chart extends Component {
                 .attr("transform", function(d){ return("translate(" + x(d.key) +" ,0)") } ); // Translation on the right to be at the group position
     
         // Right half of violin
-        g
-            .append("path")
+        g.append("path")
             .attr("class", "rightViolin")
             .datum(function(d){ return(d.value)})     // So now we are working density per density
             .style("stroke", "none")
@@ -122,8 +123,7 @@ export default class Chart extends Component {
                 .curve(curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
             );
         // Left half of violin
-        g
-            .append("path")
+        g.append("path")
             .attr("class", "leftViolin")
             .datum(function(d){ return(d.value)})
             .style("stroke", "none")
@@ -135,27 +135,36 @@ export default class Chart extends Component {
                 .curve(curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
             );
         // Vertical whiskers
-        g
-            .append("line")
-            // .datum(function(d){ return(d.extremes)})
+        g.append("line")
             .attr("y1", function(d) {return y(d.extremes[0])})
             .attr("y2", function(d) {return y(d.quartiles[0])})
             .attr("x1", xNum(0))
             .attr("x2", xNum(0))
             .style("stroke", "black");
-        g
-            .append("line")
+        g.append("line")
             .attr("y1", function(d) {return y(d.extremes[1])})
             .attr("y2", function(d) {return y(d.quartiles[1])})
             .attr("x1", xNum(0))
             .attr("x2", xNum(0))
             .style("stroke", "black");
+        // Horizontal whisker
+        g.append("line")
+            .attr("y1", function(d) {return y(d.extremes[0])})
+            .attr("y2", function(d) {return y(d.extremes[0])})
+            .attr("x1", boxPlotX1)
+            .attr("x2", boxPlotX2)
+            .style("stroke", "black");
+        g.append("line")
+            .attr("y1", function(d) {return y(d.extremes[1])})
+            .attr("y2", function(d) {return y(d.extremes[1])})
+            .attr("x1", boxPlotX1)
+            .attr("x2", boxPlotX2)
+            .style("stroke", "black");
         // Boxes
-        g
-            .append("rect")
-            .attr("x", x.bandwidth()*.25)
+        g.append("rect")
+            .attr("x", boxPlotX1)
             .attr("y", function(d) {return y(d.quartiles[1])})
-            .attr("width", x.bandwidth()*.5)
+            .attr("width", boxPlotWidth)
             .attr("height", function(d) {return y(d.quartiles[0])-y(d.quartiles[1])})
             .style("stroke", "black")
             .style("fill", "none")
