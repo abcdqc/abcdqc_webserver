@@ -20,6 +20,10 @@ Coming soon
 ## Installation 
 Coming soon
 
+To run the nginx web server, put the build files in /some/directory/ and the data files in /some/directory/data/ then run
+
+     docker run --name nginx-data -d -p 80:80 -v /some/directory:/usr/share/nginx/html:ro nginx
+
 ## How to Use
 Coming soon
 
@@ -39,3 +43,8 @@ Coming soon
  * Rebecca Waugh
  * Kat Small
  * Anna Kondylis
+
+## File name documentation
+TODO
+Examples:
+ * modalityT1-sexM-age8-scannerSiemens
