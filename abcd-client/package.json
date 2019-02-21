@@ -24,6 +24,7 @@
   ],
   "devDependencies": {
     "@material-ui/core": "^3.9.2",
+    "@material-ui/icons": "^3.0.2",
     "d3-array": "^2.0.3",
     "d3-axis": "^1.0.12",
     "d3-brush": "^1.0.6",
