@@ -25,7 +25,17 @@ Coming soon
 
 ## Next Steps
 
-### Develop on Web Client (requires node)
+**Develop on Web Client (requires node)**
  * cd abcd-client
  * npm i
  * npm start
+
+## Team Members
+ * Dylan Nielson
+ * Adam Thomas
+ * Thomas Frohwein
+ * Georgi Ivanov
+ * Tom Panning
+ * Rebecca Waugh
+ * Kat Small
+ * Anna Kondylis
