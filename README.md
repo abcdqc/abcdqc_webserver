@@ -6,7 +6,7 @@ This project is composed of three github repos ([abcdqc_webserver](https://githu
 
 ![ABCDQC Project Schematic](https://raw.githubusercontent.com/abcdqc/abcdqc_batchserver/bd637699f54891a2556c20f1a52cda67324811ad/ABCDQCflowchart.png "Project Schematic")
 
-This repo contain the code running the NGNIX webserver on the AWS client that serves the interactive visualizations from http://abcdqc.org
+This repo contain the code running the NGINX webserver on the AWS client that serves the interactive visualizations from http://abcdqc.org
 
 Install instructions are being written:
 
