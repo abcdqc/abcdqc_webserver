@@ -44,7 +44,19 @@ Coming soon
  * Kat Small
  * Anna Kondylis
 
-## File name documentation
+## Data file documentation
 TODO
-Examples:
+Examples file names:
  * modalityT1-sexM-age8-scannerSiemens
+
+Example JSON structure:
+    {
+        efc: { // IQMs at the top level
+            mean: .55; // general stats
+            quartiles: [.5, .6],
+            kde: [ // then an array of the KDE curve values
+                [10, .5], // first element is the density (width of the violin), second variable is the metric value
+                [20, .6]
+            ]
+        }
+    }
