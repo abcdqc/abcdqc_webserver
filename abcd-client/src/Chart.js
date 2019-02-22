@@ -19,6 +19,7 @@ export default class Chart extends Component {
         super(props);
         this.state = {
             showBoxPlot: true,
+            // label: "Metric",
             splitViolin: false
         }
     }
@@ -36,17 +37,17 @@ export default class Chart extends Component {
         }))
     }
 
-    enableData() {
+    /*enableData() {
         this.setState(state => ({
             useData: true
         }));
-    }
+    }*/
     
     componentDidMount() {
-        this.timerID = setInterval(
-            () => this.enableData(),
-            2000
-        );
+        // this.timerID = setInterval(
+            // () => this.enableData(),
+            // 2000
+        // );
 
         // D3 Code to create the chart
         // using this._rootNode as container
@@ -58,42 +59,27 @@ export default class Chart extends Component {
             .attr("transform",
                 "translate(" + MARGIN.left + "," + MARGIN.top + ")");
 
-        let data = this.getData();
-        if (data === undefined) {
-            this.svg.append("text")
-                .attr("x", 10)
-                .attr("y", HEIGHT/2)
-                .text("No data provided")
-        } else {
-            // To handle many plots, D3 wants an array with one element per plot. We need the key name in the element, so map it
-            // this.d3data = Object.entries(data).map(([key, value]) => {
-                // value.key = key;
-                // return value
-            // });
-            // Build and Show the Y scale
-            this.y = scaleLinear()
-                .domain(this.getYExtent(this.getData()))          // Note that here the Y scale is set manually
-                .range([HEIGHT, 0]);
-            this.svg.append("g").call(axisLeft(this.y));
+        this.svg.append("text")
+            .attr("class", "nodatamsg")
+            .attr("x", 10)
+            .attr("y", HEIGHT/2)
+            .text("No data provided");
 
-            // Build and Show the X scale. It is a band scale like for a boxplot: each group has an dedicated RANGE on the axis. This range has a length of x.bandwidth
-            this.x = scaleBand()
-                .range([0, WIDTH])
-                .domain(this.getData().map(entry => entry.key))
-                .padding(0.05);     // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
-            this.svg.append("g")
-                .attr("transform", "translate(0," + HEIGHT + ")")
-                .call(axisBottom(this.x));
-            this.svg.append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("y", 0 - MARGIN.left)
-                .attr("x",0 - (HEIGHT / 2))
-                .attr("dy", "1em")
-                .style("text-anchor", "middle")
-                .text(this.state.label);     
-
-            this.originalPlot();
-        }
+        // X axis
+        this.svg.append("g")
+            .attr("transform", "translate(0," + HEIGHT + ")")
+            .attr("class", "xaxis");
+        // Y axis
+        this.svg.append("g")
+            .attr("class", "yaxis");
+        // Vertical label
+        this.svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("class", "ylabel")
+            .attr("y", 0 - MARGIN.left)
+            .attr("x",0 - (HEIGHT / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
     }
 
     componentWillUnmount() {
@@ -101,12 +87,37 @@ export default class Chart extends Component {
     }
 
     shouldComponentUpdate() {
-        console.log("shouldComponentUpdate()");
         return true;
     }
 
     componentDidUpdate() {
-        this.originalPlot()
+        if (this.getData() === undefined) {
+            // Make sure the message is shown?
+        } else {
+            // Hide the message
+            this.svg.select(".nodatamsg").remove();
+
+            // Update the Y scale
+            this.y = scaleLinear()
+                .domain(this.getYExtent(this.getData()))
+                .range([HEIGHT, 0]);
+            this.svg.select(".yaxis")
+                .call(axisLeft(this.y));
+
+            // Build and update the X scale. It is a band scale like for a boxplot: each group has an dedicated RANGE on the axis. This range has a length of x.bandwidth
+            this.x = scaleBand()
+                .range([0, WIDTH])
+                .domain(this.getData().map(entry => entry.key))
+                .padding(0.05);     // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
+
+            this.svg.select(".xaxis")
+                .call(axisBottom(this.x));
+
+            this.svg.select(".ylabel")
+                .text(this.state.label);     
+
+            this.originalPlot();
+        }
     }
 
     _setRef(componentNode) {
@@ -158,6 +169,11 @@ export default class Chart extends Component {
             .append("g")
                 .attr("transform", d => ("translate(" + this.x(d.key) + " ,0)")) // Translation on the right to be at the group position
                 .attr("class", "violin");
+        this.svg
+            .selectAll(".violin")
+            .data(this.getData())
+            .exit()
+            .remove()
 
         // Right half of violin
         g.append("path")
@@ -247,10 +263,10 @@ export default class Chart extends Component {
     }
 
     getData() {
-        if (!this.state.useData) {
-            return undefined;
-        } else {
+        // if (!this.state.useData) {
+            // return undefined;
+        // } else {
             return this.state.data;
-        }
+        // }
     }
 }
