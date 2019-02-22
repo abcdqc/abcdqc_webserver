@@ -19,7 +19,6 @@ export default class Chart extends Component {
         super(props);
         this.state = {
             showBoxPlot: true,
-            // label: "Metric",
             splitViolin: false
         }
     }
@@ -29,19 +28,6 @@ export default class Chart extends Component {
             showBoxPlot: shouldShow
         }));
     }
-
-    setData(label, data) {
-        this.setState(state => ({
-            label: label,
-            data: data
-        }))
-    }
-
-    /*enableData() {
-        this.setState(state => ({
-            useData: true
-        }));
-    }*/
     
     componentDidMount() {
         // this.timerID = setInterval(
@@ -114,7 +100,7 @@ export default class Chart extends Component {
                 .call(axisBottom(this.x));
 
             this.svg.select(".ylabel")
-                .text(this.state.label);     
+                .text(this.prop.label);     
 
             this.originalPlot();
         }
@@ -175,8 +161,14 @@ export default class Chart extends Component {
             .exit()
             .remove()
 
-        // Right half of violin
+        let all = this.svg.selectAll(".violin")
+            .data(this.getData());
+
         g.append("path")
+            .attr("class", "rightViolin");
+
+        // Right half of violin
+        all.select(".rightViolin")
             .attr("class", "rightViolin")
             .datum(d => d.kde)     // So now we are working density per density
             .style("stroke", "none")
@@ -190,7 +182,8 @@ export default class Chart extends Component {
             );
         // Left half of violin
         g.append("path")
-            .attr("class", "leftViolin")
+            .attr("class", "leftViolin");
+        all.select(".leftViolin")
             .datum(d => d.kde)
             .style("stroke", "none")
             .style("fill", "#69b3a2")
@@ -218,15 +211,24 @@ export default class Chart extends Component {
                 .exit()
                 .remove()
 
+            let boxplots = this.svg
+                .selectAll(".box")
+                .data(this.getData());
+
             // Vertical whiskers
             boxG.append("line")
-                // .datum(function(d){ return(d.extremes)})
+                .attr("class", "bottomWhisker");
+            boxplots.select(".bottomWhisker")
+                .attr("class", "bottomWhisker")
                 .attr("y1", d => this.y(d.boxplot.extremes[0]))
                 .attr("y2", d => this.y(d.boxplot.quartiles[0]))
                 .attr("x1", xNum(0))
                 .attr("x2", xNum(0))
                 .style("stroke", "black");
             boxG.append("line")
+                .attr("class", "topWhisker");
+            boxplots.select(".topWhisker")
+                .attr("class", "topWhisker")
                 .attr("y1", d => this.y(d.boxplot.extremes[1]))
                 .attr("y2", d => this.y(d.boxplot.quartiles[1]))
                 .attr("x1", xNum(0))
@@ -234,12 +236,18 @@ export default class Chart extends Component {
                 .style("stroke", "black");
             // Horizontal whisker
             boxG.append("line")
+                .attr("class", "bottomWhiskerBar");
+            boxplots.select(".bottomWhiskerBar")
+                .attr("class", "bottomWhiskerBar")
                 .attr("y1", d => this.y(d.boxplot.extremes[0]))
                 .attr("y2", d => this.y(d.boxplot.extremes[0]))
                 .attr("x1", boxPlotX1)
                 .attr("x2", boxPlotX2)
                 .style("stroke", "black");
             boxG.append("line")
+                .attr("class", "topWhiskerBar");
+            boxplots.select(".topWhiskerBar")
+                .attr("class", "topWhiskerBar")
                 .attr("y1", d => this.y(d.boxplot.extremes[1]))
                 .attr("y2", d => this.y(d.boxplot.extremes[1]))
                 .attr("x1", boxPlotX1)
@@ -247,6 +255,9 @@ export default class Chart extends Component {
                 .style("stroke", "black");
             // Boxes
             boxG.append("rect")
+                .attr("class", "quartileBox");
+            boxplots.select(".quartileBox")
+                .attr("class", "quartileBox")
                 .attr("x", this.x.bandwidth() * .25)
                 .attr("y", d => this.y(d.boxplot.quartiles[1]))
                 .attr("width", boxPlotWidth)
@@ -263,10 +274,6 @@ export default class Chart extends Component {
     }
 
     getData() {
-        // if (!this.state.useData) {
-            // return undefined;
-        // } else {
-            return this.state.data;
-        // }
+        return this.prop.data;
     }
 }
