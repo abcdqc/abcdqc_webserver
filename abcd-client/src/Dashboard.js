@@ -196,8 +196,8 @@ class Dashboard extends Component {
     processData = (state, res) => {
         this.setState(state => ({
             datas: state.iqm
-                .filter(imq => !!res[imq])
-                .map(imq => ({imq: imq, data: [Object.assign({key: 'x split'}, res[imq])]}))
+                .filter(iqm => !!res[iqm])
+                .map(iqm => ({iqm: iqm, data: [Object.assign({key: 'x split'}, res[iqm])]}))
         }));
     };
 
