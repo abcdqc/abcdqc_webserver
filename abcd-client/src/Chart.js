@@ -100,7 +100,7 @@ export default class Chart extends Component {
                 .call(axisBottom(this.x));
 
             this.svg.select(".ylabel")
-                .text(this.prop.label);     
+                .text(this.props.label);     
 
             this.originalPlot();
         }
@@ -274,6 +274,6 @@ export default class Chart extends Component {
     }
 
     getData() {
-        return this.prop.data;
+        return this.props.data;
     }
 }

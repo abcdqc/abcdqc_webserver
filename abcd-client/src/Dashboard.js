@@ -180,11 +180,11 @@ class Dashboard extends Component {
         addKv(file, 'Sex', this.state.sex);
         const state = this.copyState();
 
-        fetch('http://abcdqc.org/data/v0.1/' + file.name + '.json', {mode: 'no-cors'})
+        fetch('/data/v0.1/' + file.name + '.json', {mode: 'no-cors'})
             .then(response => {
                 response.text().then(text => {
                     if (!text.startsWith('{')) return;
-                    fetch('/' + file.name + '.json', {mode: 'no-cors'})
+                    fetch('/data/v0.1/' + file.name + '.json', {mode: 'no-cors'})
                         .then(res => res.json())
                         .then(res => {
                             this.processData(state, res)
@@ -197,7 +197,7 @@ class Dashboard extends Component {
         this.setState(state => ({
             datas: state.iqm
                 .filter(imq => !!res[imq])
-                .map(imq => ({imq: imq, data: Object.assign({key: 'x split'}, res[imq])}))
+                .map(imq => ({imq: imq, data: [Object.assign({key: 'x split'}, res[imq])]}))
         }));
     };
 
@@ -435,7 +435,7 @@ class Dashboard extends Component {
                 </Grid>
                 <Grid item xs={12} sm={6} md={7} lg={8} xl={9}>
                     {this.state.datas.map(d => (
-                        <Chart data={d.data} label={d.iqm}/>
+                        <Chart data={d.data} label={d.iqm} key={d.iqm}/>
                     ))}
                 </Grid>
             </Grid>
