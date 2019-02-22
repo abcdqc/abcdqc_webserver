@@ -141,6 +141,9 @@ export default class Chart extends Component {
 
     originalPlot() {
         console.log("Plotting");
+        if (this.d3data === undefined) {
+            return;
+        }
         var xNum = this.getViolinXAxis(this.d3data, this.x);
 
     
