@@ -58,14 +58,21 @@ optsIqm.bold = ['dummy_trs', 'dvars_nstd',
     'summary_fg_median', 'summary_fg_n', 'summary_fg_p05', 'summary_fg_p95',
     'summary_fg_stdv', 'tsnr'];
 
-const optsManualQC = ['yes', 'no'];
-const optsModel = [
-    'GE Archieva dStream',
-    'GE Ingenia',
-    'GE SIGNA Creator',
-    'Philips Prisma',
-    'Philips Prisma fit',
-    'Siemens DISCOVERY MR750'
+const optsManualQC = ['True', 'False'];
+
+const optsManufacturer = ['GE', 'Philips', 'Siements'];
+const optsManufacturerModel = {};
+optsManufacturerModel.GE = [
+    'DISCOVERY_MR750',
+    'Ingenia',
+    'SIGNA Creator'
+];
+optsManufacturerModel.Philips = [
+    'Archieva dStream'
+];
+optsManufacturerModel.Siemens = [
+    'Prisma',
+    'Prisma fit'
 ];
 const optsRun = [1, 2, 3, 4, 5];
 const optsTask = ['mid', 'nback', 'rest', 'sst'];
@@ -98,19 +105,18 @@ const styles = theme => ({
 
 class Dashboard extends Component {
     state = {
-        menuDemographics: false,
-        menuEnvironment: false,
-        ready: true,
+        datas: [],
         age: 'all',
         iqm: optsIqm['T1w'].concat(),
-        manualQC: '',
+        manualQC: 'all',
+        manufacturer: 'all',
         modality: 'T1w',
         model: 'all',
-        run: '',
+        run: 'all',
         sex: 'all',
         splitX: '',
         splitViolin: '',
-        task: '',
+        task: 'all',
     };
 
     handleChange = name => event => {
@@ -120,11 +126,6 @@ class Dashboard extends Component {
 
     handleChecked = name => event => {
         this.setState({ [name]: event.target.checked });
-        this.load();
-    };
-
-    handleClick = () => {
-        this.setState(state => ({ menuDemographics: !state.menuDemographics }));
         this.load();
     };
 
@@ -138,8 +139,66 @@ class Dashboard extends Component {
         this.load();
     };
 
+    copyState = () => {
+        return {
+            age: this.state.age,
+            iqm: this.state.iqm,
+            manualQC: this.state.manualQC,
+            manufacturer: this.state.manufacturer,
+            modality: this.state.modality,
+            model: this.state.model,
+            run: this.state.run,
+            sex: this.state.sex,
+            splitX: this.state.splitX,
+            splitViolin: this.state.splitViolin,
+            task: this.state.task,
+        }
+    };
+
     load = () => {
-        //
+        const SEP = '___';
+        const VAL = '-';
+        function kv(key, value) {
+            return key + VAL + value;
+        }
+        function addKv(file, key, value) {
+            if (value) {
+                file.name += SEP + kv(key, value);
+            }
+        }
+
+        if (!this.state.modality) {
+            return;
+        }
+        let file = {};
+
+        file.name = kv('Modality', this.state.modality);
+        addKv(file, 'Manufacturer', this.state.manufacturer);
+        addKv(file, 'Model', this.state.model);
+        addKv(file, 'Task', this.state.task);
+        addKv(file, 'QC', this.state.manualQC);
+        addKv(file, 'Sex', this.state.sex);
+        const state = this.copyState();
+
+        fetch('http://abcdqc.org/data/v0.1/' + file.name + '.json', {mode: 'no-cors'})
+            .then(response => {
+                response.text().then(text => {
+                    if (!text.startsWith('{')) return;
+                    fetch('/' + file.name + '.json', {mode: 'no-cors'})
+                        .then(res => res.json())
+                        .then(res => {
+                            this.processData(state, res)
+                        });
+                });
+            });
+    };
+
+    processData = (state, res) => {
+        this.setState(state => ({
+            datas: state.iqm
+                .filter(imq => !!res[imq])
+                .map(imq => ({imq: imq, data: Object.assign({key: 'x split'}, res[imq])}))
+        }));
     };
 
     render() {
@@ -204,7 +263,7 @@ class Dashboard extends Component {
                                             id: 'task',
                                         }}
                                     >
-                                        <MenuItem value=''>
+                                        <MenuItem value='all'>
                                             <em>All</em>
                                         </MenuItem>
                                         {optsTask.map(opt => (
@@ -222,7 +281,7 @@ class Dashboard extends Component {
                                             id: 'run',
                                         }}
                                     >
-                                        <MenuItem value=''>
+                                        <MenuItem value='all'>
                                             <em>All</em>
                                         </MenuItem>
                                         {optsRun.map(opt => (
@@ -240,7 +299,7 @@ class Dashboard extends Component {
                                             id: 'manualQC',
                                         }}
                                     >
-                                        <MenuItem value=''>
+                                        <MenuItem value='all'>
                                             <em>All</em>
                                         </MenuItem>
                                         {optsManualQC.map(opt => (
@@ -265,7 +324,7 @@ class Dashboard extends Component {
                                             id: 'age',
                                         }}
                                     >
-                                        <MenuItem value=''>
+                                        <MenuItem value='all'>
                                             <em>All</em>
                                         </MenuItem>
                                         <MenuItem value={10}>0-17</MenuItem>
@@ -283,20 +342,38 @@ class Dashboard extends Component {
                                             id: 'sex',
                                         }}
                                     >
-                                        <MenuItem value=''>
+                                        <MenuItem value='all'>
                                             <em>All</em>
                                         </MenuItem>
-                                        <MenuItem value='male'>Male</MenuItem>
-                                        <MenuItem value='female'>Female</MenuItem>
+                                        <MenuItem value='M'>Male</MenuItem>
+                                        <MenuItem value='F'>Female</MenuItem>
                                     </Select>
                                 </FormControl>
                             </ExpansionPanelDetails>
                         </ExpansionPanel>
                         <ExpansionPanel>
                             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                <Typography className={classes.heading}>Location</Typography>
+                                <Typography className={classes.heading}>Device</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.details}>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel htmlFor='manufacturer'>MRI Machine Manufacturer</InputLabel>
+                                    <Select
+                                        value={this.state.manufacturer}
+                                        onChange={this.handleChange('manufacturer')}
+                                        inputProps={{
+                                            name: 'manufacturer',
+                                            id: 'manufacturer',
+                                        }}
+                                    >
+                                        <MenuItem value='all'>
+                                            <em>All</em>
+                                        </MenuItem>
+                                        {optsManufacturer.map(opt => (
+                                            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
                                 <FormControl className={classes.formControl}>
                                     <InputLabel htmlFor='model'>MRI Machine Model</InputLabel>
                                     <Select
@@ -307,10 +384,10 @@ class Dashboard extends Component {
                                             id: 'model',
                                         }}
                                     >
-                                        <MenuItem value=''>
+                                        <MenuItem value='all'>
                                             <em>All</em>
                                         </MenuItem>
-                                        {optsModel.map(opt => (
+                                        {this.state.manufacturer !== 'all' && optsManufacturerModel[this.state.manufacturer].map(opt => (
                                             <MenuItem key={opt} value={opt}>{opt}</MenuItem>
                                         ))}
                                     </Select>
@@ -357,7 +434,9 @@ class Dashboard extends Component {
                     </form>
                 </Grid>
                 <Grid item xs={12} sm={6} md={7} lg={8} xl={9}>
-                    <Chart/>
+                    {this.state.datas.map(d => (
+                        <Chart data={d.data} label={d.iqm}/>
+                    ))}
                 </Grid>
             </Grid>
         );
