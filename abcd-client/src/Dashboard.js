@@ -3,26 +3,79 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormLabel from '@material-ui/core/FormLabel';
 import Select from '@material-ui/core/Select';
 import Chart from './Chart';
+
+const optsModality = ['T1w', 'T2w', 'bold'];
+const optsIqm = {};
+optsIqm.T1w = ['cjv', 'cnr', 'efc', 'fber', 'fwhm_avg',
+    'fwhm_x', 'fwhm_y', 'fwhm_z', 'icvs_csf', 'icvs_gm', 'icvs_wm',
+    'inu_med', 'inu_range', 'qi_1', 'qi_2', 'rpve_csf', 'rpve_gm',
+    'rpve_wm', 'size_x', 'size_y', 'size_z', 'snr_csf', 'snr_gm',
+    'snr_total', 'snr_wm', 'snrd_csf', 'snrd_gm', 'snrd_total', 'snrd_wm',
+    'spacing_x', 'spacing_y', 'spacing_z', 'summary_bg_k', 'summary_bg_mad',
+    'summary_bg_mean', 'summary_bg_median', 'summary_bg_n',
+    'summary_bg_p05', 'summary_bg_p95', 'summary_bg_stdv', 'summary_csf_k',
+    'summary_csf_mad', 'summary_csf_mean', 'summary_csf_median',
+    'summary_csf_n', 'summary_csf_p05', 'summary_csf_p95',
+    'summary_csf_stdv', 'summary_gm_k', 'summary_gm_mad', 'summary_gm_mean',
+    'summary_gm_median', 'summary_gm_n', 'summary_gm_p05', 'summary_gm_p95',
+    'summary_gm_stdv', 'summary_wm_k', 'summary_wm_mad', 'summary_wm_mean',
+    'summary_wm_median', 'summary_wm_n', 'summary_wm_p05', 'summary_wm_p95',
+    'summary_wm_stdv', 'tpm_overlap_csf', 'tpm_overlap_gm',
+    'tpm_overlap_wm', 'wm2max'];
+optsIqm.T2w = ['cjv', 'cnr', 'efc', 'fber', 'fwhm_avg',
+    'fwhm_x', 'fwhm_y', 'fwhm_z', 'icvs_csf', 'icvs_gm', 'icvs_wm',
+    'inu_med', 'inu_range', 'qi_1', 'qi_2', 'rpve_csf', 'rpve_gm',
+    'rpve_wm', 'size_x', 'size_y', 'size_z', 'snr_csf', 'snr_gm',
+    'snr_total', 'snr_wm', 'snrd_csf', 'snrd_gm', 'snrd_total', 'snrd_wm',
+    'spacing_x', 'spacing_y', 'spacing_z', 'summary_bg_k', 'summary_bg_mad',
+    'summary_bg_mean', 'summary_bg_median', 'summary_bg_n',
+    'summary_bg_p05', 'summary_bg_p95', 'summary_bg_stdv', 'summary_csf_k',
+    'summary_csf_mad', 'summary_csf_mean', 'summary_csf_median',
+    'summary_csf_n', 'summary_csf_p05', 'summary_csf_p95',
+    'summary_csf_stdv', 'summary_gm_k', 'summary_gm_mad', 'summary_gm_mean',
+    'summary_gm_median', 'summary_gm_n', 'summary_gm_p05', 'summary_gm_p95',
+    'summary_gm_stdv', 'summary_wm_k', 'summary_wm_mad', 'summary_wm_mean',
+    'summary_wm_median', 'summary_wm_n', 'summary_wm_p05', 'summary_wm_p95',
+    'summary_wm_stdv', 'tpm_overlap_csf', 'tpm_overlap_gm',
+    'tpm_overlap_wm', 'wm2max'];
+optsIqm.bold = ['dummy_trs', 'dvars_nstd',
+    'dvars_std', 'dvars_vstd', 'efc', 'fber', 'fd_mean', 'fd_num',
+    'fd_perc', 'fwhm_avg', 'fwhm_x', 'fwhm_y', 'fwhm_z', 'gcor', 'gsr_x',
+    'gsr_y', 'provenance__settings__fd_thres', 'size_t', 'size_x', 'size_y',
+    'size_z', 'snr', 'spacing_tr', 'spacing_x', 'spacing_y', 'spacing_z',
+    'summary_bg_k', 'summary_bg_mad', 'summary_bg_mean',
+    'summary_bg_median', 'summary_bg_n', 'summary_bg_p05', 'summary_bg_p95',
+    'summary_bg_stdv', 'summary_fg_k', 'summary_fg_mad', 'summary_fg_mean',
+    'summary_fg_median', 'summary_fg_n', 'summary_fg_p05', 'summary_fg_p95',
+    'summary_fg_stdv', 'tsnr'];
+
+const optsManualQC = ['yes', 'no'];
+const optsModel = [
+    'GE Archieva dStream',
+    'GE Ingenia',
+    'GE SIGNA Creator',
+    'Philips Prisma',
+    'Philips Prisma fit',
+    'Siemens DISCOVERY MR750'
+];
+const optsRun = [1, 2, 3, 4, 5];
+const optsTask = ['mid', 'nback', 'rest', 'sst'];
 
 const styles = theme => ({
     root: {
         width: '100%',
     },
     details: {
-        flexDirection: "column"
+        flexDirection: 'column'
     },
     formControl: {
         margin: theme.spacing.unit,
@@ -32,8 +85,11 @@ const styles = theme => ({
         margin: `${theme.spacing.unit}px 0`,
     },
     heading: {
-        fontSize: theme.typography.pxToRem(15),
+        fontSize: theme.typography.pxToRem(20),
         fontWeight: theme.typography.fontWeightRegular,
+    },
+    margin: {
+        margin: theme.spacing.unit,
     },
     selectEmpty: {
         marginTop: theme.spacing.unit * 2,
@@ -45,65 +101,171 @@ class Dashboard extends Component {
         menuDemographics: false,
         menuEnvironment: false,
         ready: true,
-        searchString: '',
-        ages: ['0-17', '18-54', '55+'],
         age: 'all',
-        gender: 'all',
-        model: 'all'
+        iqm: optsIqm['T1w'].concat(),
+        manualQC: '',
+        modality: 'T1w',
+        model: 'all',
+        run: '',
+        sex: 'all',
+        splitX: '',
+        splitViolin: '',
+        task: '',
     };
 
     handleChange = name => event => {
         this.setState({ [name]: event.target.value });
+        this.load();
     };
 
     handleChecked = name => event => {
         this.setState({ [name]: event.target.checked });
+        this.load();
     };
 
     handleClick = () => {
         this.setState(state => ({ menuDemographics: !state.menuDemographics }));
+        this.load();
     };
 
-    onSearchInputChange = (event) => {
-        if (event.target.value) {
-            this.setState({searchString: event.target.value})
-        } else {
-            this.setState({searchString: ''})
-        }
+    iqmAll = () => {
+        this.setState({iqm: optsIqm[this.state.modality].concat()});
+        this.load();
+    };
+
+    iqmNone = () => {
+        this.setState({iqm: []});
+        this.load();
+    };
+
+    load = () => {
+        //
     };
 
     render() {
         const { classes } = this.props;
         return (
             <Grid container spacing={24} style={{padding: 24}}>
-                <Grid item xs={12} sm={6} lg={4} xl={3}>
-                    <form className={classes.root} autoComplete="off">
+                <Grid item xs={12} sm={6} md={5} lg={4} xl={3}>
+                    <form className={classes.root} autoComplete='off'>
+                        <Typography className={classes.heading}>Filter</Typography>
+                        <FormControl className={classes.root} style={{marginBottom: '10px'}}>
+                            <InputLabel htmlFor='modality'>Modality</InputLabel>
+                            <Select value={this.state.modality}
+                                    onChange={this.handleChange('modality')}
+                                    inputProps={{
+                                        name: 'modality',
+                                        id: 'modality',
+                                    }}
+                            >
+                                {optsModality.map(opt => (
+                                    <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl className={classes.root}>
+                            <InputLabel htmlFor='iqm'>IQM</InputLabel>
+                            <Select
+                                value={this.state.iqm}
+                                onChange={this.handleChange('iqm')}
+                                multiple={true}
+                                inputProps={{
+                                    name: 'iqm',
+                                    id: 'iqm',
+                                }}
+                            >
+                                {this.state.modality && optsIqm[this.state.modality].map(opt => (
+                                    <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <div style={{marginBottom: '10px'}}>
+                            <Button variant='outlined' size='small' color='primary' className={classes.margin}
+                                    onClick={this.iqmAll}>
+                                All IQMs
+                            </Button>
+                            <Button variant='outlined' size='small' color='primary' className={classes.margin}
+                                    onClick={this.iqmNone}>
+                                Clear IQMs
+                            </Button>
+                        </div>
+                        <ExpansionPanel>
+                            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                                <Typography className={classes.heading}>Timing</Typography>
+                            </ExpansionPanelSummary>
+                            <ExpansionPanelDetails className={classes.details}>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel htmlFor='task'>Task</InputLabel>
+                                    <Select
+                                        value={this.state.task}
+                                        onChange={this.handleChange('task')}
+                                        inputProps={{
+                                            name: 'task',
+                                            id: 'task',
+                                        }}
+                                    >
+                                        <MenuItem value=''>
+                                            <em>All</em>
+                                        </MenuItem>
+                                        {optsTask.map(opt => (
+                                            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel htmlFor='run'>Run</InputLabel>
+                                    <Select
+                                        value={this.state.run}
+                                        onChange={this.handleChange('run')}
+                                        inputProps={{
+                                            name: 'run',
+                                            id: 'run',
+                                        }}
+                                    >
+                                        <MenuItem value=''>
+                                            <em>All</em>
+                                        </MenuItem>
+                                        {optsRun.map(opt => (
+                                            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel htmlFor='manualQC'>Manual QC Reviewed</InputLabel>
+                                    <Select
+                                        value={this.state.manualQC}
+                                        onChange={this.handleChange('manualQC')}
+                                        inputProps={{
+                                            name: 'manualQC',
+                                            id: 'manualQC',
+                                        }}
+                                    >
+                                        <MenuItem value=''>
+                                            <em>All</em>
+                                        </MenuItem>
+                                        {optsManualQC.map(opt => (
+                                            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </ExpansionPanelDetails>
+                        </ExpansionPanel>
                         <ExpansionPanel>
                             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                                 <Typography className={classes.heading}>Demographics</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.details}>
-                                <Typography>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex,
-                                    sit amet blandit leo lobortis eget.
-                                </Typography>
-                                <TextField style={{padding: 24}}
-                                           id="searchInput"
-                                           placeholder="Search for ___"
-                                           margin="normal"
-                                           onChange={this.onSearchInputChange}
-                                />
                                 <FormControl className={classes.formControl}>
-                                    <InputLabel htmlFor="age-simple">Age</InputLabel>
+                                    <InputLabel htmlFor='age'>Age</InputLabel>
                                     <Select
                                         value={this.state.age}
                                         onChange={this.handleChange('age')}
                                         inputProps={{
                                             name: 'age',
-                                            id: 'age-simple',
+                                            id: 'age',
                                         }}
                                     >
-                                        <MenuItem value="all">
+                                        <MenuItem value=''>
                                             <em>All</em>
                                         </MenuItem>
                                         <MenuItem value={10}>0-17</MenuItem>
@@ -111,50 +273,90 @@ class Dashboard extends Component {
                                         <MenuItem value={30}>55+</MenuItem>
                                     </Select>
                                 </FormControl>
-                                <FormControl component="fieldset" className={classes.formControl}>
-                                    <FormLabel component="legend">Gender</FormLabel>
-                                    <RadioGroup
-                                        aria-label="Gender"
-                                        name="gender1"
-                                        className={classes.group}
-                                        value={this.state.gender}
-                                        onChange={this.handleChange('gender')}
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel htmlFor='sex'>Sex</InputLabel>
+                                    <Select
+                                        value={this.state.sex}
+                                        onChange={this.handleChange('sex')}
+                                        inputProps={{
+                                            name: 'sex',
+                                            id: 'sex',
+                                        }}
                                     >
-                                        <FormControlLabel value="female" control={<Radio />} label="Female" />
-                                        <FormControlLabel value="male" control={<Radio />} label="Male" />
-                                        <FormControlLabel value="all" control={<Radio />} label="Any" />
-                                    </RadioGroup>
+                                        <MenuItem value=''>
+                                            <em>All</em>
+                                        </MenuItem>
+                                        <MenuItem value='male'>Male</MenuItem>
+                                        <MenuItem value='female'>Female</MenuItem>
+                                    </Select>
                                 </FormControl>
                             </ExpansionPanelDetails>
                         </ExpansionPanel>
                         <ExpansionPanel>
                             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                <Typography className={classes.heading}>Environment</Typography>
+                                <Typography className={classes.heading}>Location</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.details}>
                                 <FormControl className={classes.formControl}>
-                                    <InputLabel htmlFor="model-simple">MRI Machine Model</InputLabel>
+                                    <InputLabel htmlFor='model'>MRI Machine Model</InputLabel>
                                     <Select
                                         value={this.state.model}
                                         onChange={this.handleChange('model')}
                                         inputProps={{
                                             name: 'model',
-                                            id: 'model-simple',
+                                            id: 'model',
                                         }}
                                     >
-                                        <MenuItem value="all">
+                                        <MenuItem value=''>
                                             <em>All</em>
                                         </MenuItem>
-                                        <MenuItem value={10}>Siemens</MenuItem>
-                                        <MenuItem value={20}>A</MenuItem>
-                                        <MenuItem value={30}>B</MenuItem>
+                                        {optsModel.map(opt => (
+                                            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                                        ))}
                                     </Select>
                                 </FormControl>
                             </ExpansionPanelDetails>
                         </ExpansionPanel>
+
+                        <Typography className={classes.heading} style={{marginTop: '30px'}}>Split</Typography>
+                        <Typography>The matching filter setting will be ignored.</Typography>
+                        <FormControl className={classes.root}>
+                            <InputLabel htmlFor='splitX'>Split X axis</InputLabel>
+                            <Select
+                                value={this.state.splitX}
+                                onChange={this.handleChange('splitX')}
+                                inputProps={{
+                                    name: 'splitX',
+                                    id: 'splitX',
+                                }}
+                            >
+                                <MenuItem value=''>
+                                    <em>No Split</em>
+                                </MenuItem>
+                                <MenuItem value='sex'>sex</MenuItem>
+                                <MenuItem value='age'>age</MenuItem>
+                                <MenuItem value='model'>model</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <FormControl className={classes.root}>
+                            <InputLabel htmlFor='splitViolin'>Split Violin into 2 parts</InputLabel>
+                            <Select
+                                value={this.state.splitViolin}
+                                onChange={this.handleChange('splitViolin')}
+                                inputProps={{
+                                    name: 'splitViolin',
+                                    id: 'splitViolin',
+                                }}
+                            >
+                                <MenuItem value=''>
+                                    <em>No Split</em>
+                                </MenuItem>
+                                <MenuItem value='sex'>sex</MenuItem>
+                            </Select>
+                        </FormControl>
                     </form>
                 </Grid>
-                <Grid item xs={12} sm={6} lg={8} xl={9}>
+                <Grid item xs={12} sm={6} md={7} lg={8} xl={9}>
                     <Chart/>
                 </Grid>
             </Grid>
