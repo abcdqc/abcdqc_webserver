@@ -8,7 +8,7 @@ import { area, curveCatmullRom } from 'd3-shape'
 const DENSITY_INDEX = 1;
 const VALUE_INDEX = 0;
 // set the dimensions and margins of the graph
-const MARGIN = {top: 10, right: 30, bottom: 30, left: 40};
+const MARGIN = {top: 10, right: 30, bottom: 30, left: 60};
 const WIDTH = 460 - MARGIN.left - MARGIN.right;
 const HEIGHT = 400 - MARGIN.top - MARGIN.bottom;
 
@@ -29,17 +29,24 @@ export default class Chart extends Component {
         }));
     }
 
-    setData(data) {
+    setData(label, data) {
         this.setState(state => ({
+            label: label,
             data: data
         }))
     }
+
+    enableData() {
+        this.setState(state => ({
+            useData: true
+        }));
+    }
     
     componentDidMount() {
-        // this.timerID = setInterval(
-        //     () => this.setShowBoxPlot(!this.state.showBoxPlot),
-        //     2000
-        // );
+        this.timerID = setInterval(
+            () => this.enableData(),
+            2000
+        );
 
         // D3 Code to create the chart
         // using this._rootNode as container
@@ -51,46 +58,39 @@ export default class Chart extends Component {
             .attr("transform",
                 "translate(" + MARGIN.left + "," + MARGIN.top + ")");
 
-        let total = this.getData();
-        if (total === undefined) {
+        let data = this.getData();
+        if (data === undefined) {
             this.svg.append("text")
                 .attr("x", 10)
                 .attr("y", HEIGHT/2)
                 .text("No data provided")
         } else {
-            // Eventually, the data will look like this:
-            let data = {
-                Total: {
-                    kde: total
-                },
-                "Foo Bar": {
-                    kde: total
-                }
-            }
-            data.Total.extremes = [4.0, 6.5];
-            data.Total.quartiles = [4.5, 5.5];
-            data["Foo Bar"].extremes = [4.0, 6.5];
-            data["Foo Bar"].quartiles = [4.5, 5.5];
             // To handle many plots, D3 wants an array with one element per plot. We need the key name in the element, so map it
-            this.d3data = Object.entries(data).map(([key, value]) => {
-                value.key = key;
-                return value
-            });
-
+            // this.d3data = Object.entries(data).map(([key, value]) => {
+                // value.key = key;
+                // return value
+            // });
             // Build and Show the Y scale
             this.y = scaleLinear()
-                .domain(this.getYExtent(this.d3data))          // Note that here the Y scale is set manually
+                .domain(this.getYExtent(this.getData()))          // Note that here the Y scale is set manually
                 .range([HEIGHT, 0]);
             this.svg.append("g").call(axisLeft(this.y));
 
             // Build and Show the X scale. It is a band scale like for a boxplot: each group has an dedicated RANGE on the axis. This range has a length of x.bandwidth
             this.x = scaleBand()
                 .range([0, WIDTH])
-                .domain(this.d3data.map(entry => entry.key))
+                .domain(this.getData().map(entry => entry.key))
                 .padding(0.05);     // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
             this.svg.append("g")
                 .attr("transform", "translate(0," + HEIGHT + ")")
                 .call(axisBottom(this.x));
+            this.svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - MARGIN.left)
+                .attr("x",0 - (HEIGHT / 2))
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .text(this.state.label);     
 
             this.originalPlot();
         }
@@ -141,10 +141,10 @@ export default class Chart extends Component {
 
     originalPlot() {
         console.log("Plotting");
-        if (this.d3data === undefined) {
+        if (this.getData() === undefined) {
             return;
         }
-        var xNum = this.getViolinXAxis(this.d3data, this.x);
+        var xNum = this.getViolinXAxis(this.getData(), this.x);
 
     
         const boxPlotX1 = this.x.bandwidth()*.25,
@@ -153,7 +153,7 @@ export default class Chart extends Component {
 
         let g = this.svg
             .selectAll(".violin")
-            .data(this.d3data)
+            .data(this.getData())
             .enter()        // So now we are working group per group
             .append("g")
                 .attr("transform", d => ("translate(" + this.x(d.key) + " ,0)")) // Translation on the right to be at the group position
@@ -177,9 +177,11 @@ export default class Chart extends Component {
             .attr("class", "leftViolin")
             .datum(d => d.kde)
             .style("stroke", "none")
-            .style("fill", "red")
+            .style("fill", "#69b3a2")
+            // .style("fill", "red")
             .attr("d", area()
-                .x0(d => xNum(-d[DENSITY_INDEX] / 2))
+                // .x0(d => xNum(-d[DENSITY_INDEX] / 2))
+                .x0(d => xNum(-d[DENSITY_INDEX]))
                 .x1(xNum(0))
                 .y(d => this.y(d[VALUE_INDEX]))
                 .curve(curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
@@ -189,50 +191,50 @@ export default class Chart extends Component {
         if (!this.state.splitViolin && this.state.showBoxPlot) {
             let boxG = this.svg
                 .selectAll(".box")
-                .data(this.d3data)
+                .data(this.getData())
                 .enter()        // So now we are working group per group
                 .append("g")
                     .attr("transform", d => ("translate(" + this.x(d.key) + " ,0)")) // Translation on the right to be at the group position
                     .attr("class", "box");
             this.svg
                 .selectAll(".box")
-                .data(this.d3data)
+                .data(this.getData())
                 .exit()
                 .remove()
 
             // Vertical whiskers
             boxG.append("line")
                 // .datum(function(d){ return(d.extremes)})
-                .attr("y1", d => this.y(d.extremes[0]))
-                .attr("y2", d => this.y(d.quartiles[0]))
+                .attr("y1", d => this.y(d.boxplot.extremes[0]))
+                .attr("y2", d => this.y(d.boxplot.quartiles[0]))
                 .attr("x1", xNum(0))
                 .attr("x2", xNum(0))
                 .style("stroke", "black");
             boxG.append("line")
-                .attr("y1", d => this.y(d.extremes[1]))
-                .attr("y2", d => this.y(d.quartiles[1]))
+                .attr("y1", d => this.y(d.boxplot.extremes[1]))
+                .attr("y2", d => this.y(d.boxplot.quartiles[1]))
                 .attr("x1", xNum(0))
                 .attr("x2", xNum(0))
                 .style("stroke", "black");
             // Horizontal whisker
             boxG.append("line")
-                .attr("y1", d => this.y(d.extremes[0]))
-                .attr("y2", d => this.y(d.extremes[0]))
+                .attr("y1", d => this.y(d.boxplot.extremes[0]))
+                .attr("y2", d => this.y(d.boxplot.extremes[0]))
                 .attr("x1", boxPlotX1)
                 .attr("x2", boxPlotX2)
                 .style("stroke", "black");
             boxG.append("line")
-                .attr("y1", d => this.y(d.extremes[1]))
-                .attr("y2", d => this.y(d.extremes[1]))
+                .attr("y1", d => this.y(d.boxplot.extremes[1]))
+                .attr("y2", d => this.y(d.boxplot.extremes[1]))
                 .attr("x1", boxPlotX1)
                 .attr("x2", boxPlotX2)
                 .style("stroke", "black");
             // Boxes
             boxG.append("rect")
                 .attr("x", this.x.bandwidth() * .25)
-                .attr("y", d => this.y(d.quartiles[1]))
+                .attr("y", d => this.y(d.boxplot.quartiles[1]))
                 .attr("width", boxPlotWidth)
-                .attr("height", d => this.y(d.quartiles[0]) - this.y(d.quartiles[1]))
+                .attr("height", d => this.y(d.boxplot.quartiles[0]) - this.y(d.boxplot.quartiles[1]))
                 .style("stroke", "black")
                 .style("fill", "none")
         } else {
@@ -245,6 +247,10 @@ export default class Chart extends Component {
     }
 
     getData() {
-        return this.state.data;
+        if (!this.state.useData) {
+            return undefined;
+        } else {
+            return this.state.data;
+        }
     }
 }
