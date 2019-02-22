@@ -49,8 +49,9 @@ The files are formatted as JSON objects where the top-level keys are the names o
 
     {
         efc: { // IQMs at the top level
-            mean: .55; // general stats
-            quartiles: [.5, .6],
+            boxplot: {
+                quartiles: [.1, .55. .7]; // general stats
+                extremes: [.05, .9],
             kde: [ // then an array of the KDE curve values
                 [.5, 10], // first element is the metric value, second element is the density (width of the violin)
                 [.6, 20]
