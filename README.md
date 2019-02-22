@@ -18,9 +18,9 @@ Coming soon
 ![ABCDQC Project Schematic](https://raw.githubusercontent.com/abcdqc/abcdqc_batchserver/bd637699f54891a2556c20f1a52cda67324811ad/ABCDQCflowchart.png "Project Schematic")
 
 ## Installation 
-Coming soon
+To build the website, `cd abcd-client; npm build` and then place the contents of `abcd-client/build` in your webserver's content directory, e.g., `cp build/* /some/directory/`.
 
-To run the nginx web server, put the build files in /some/directory/ and the data files in /some/directory/data/ then run
+To run an nginx web server, assuming the build files are in `/some/directory/` and the data files in `/some/directory/data/` then run
 
      docker run --name nginx-data -d -p 80:80 -v /some/directory:/usr/share/nginx/html:ro nginx
 
@@ -45,19 +45,17 @@ Coming soon
  * Anna Kondylis
 
 ## Data file documentation
-TODO
-Examples file names:
- * modalityT1-sexM-age8-scannerSiemens
+The aggregations for all possible plots are pre-calculated in the [abcdqc_batchserver](https://github.com/abcdqc/abcdqc_batchserver) and served as files from within the webserver. The file names describe what filters were applied before calculating the aggregations. For instance, the aggregations for scans made with just a GE scanner are stored in `Manufacturer-GE.json`.
 
-Example JSON structure:
+The files are formatted as JSON objects where the top-level keys are the names of the IQMs. Inside the IQM are various statistics. The `kde` field is an array of coordinates. Each coordinate is an array of two values, where the first is the metric value (the y-axis on a violin plot) and the second is the density (width of the violin plot). Example JSON structure:
 
     {
         efc: { // IQMs at the top level
             mean: .55; // general stats
             quartiles: [.5, .6],
             kde: [ // then an array of the KDE curve values
-                [10, .5], // first element is the density (width of the violin), second variable is the metric value
-                [20, .6]
+                [.5, 10], // first element is the metric value, second element is the density (width of the violin)
+                [.6, 20]
             ]
         }
     }
