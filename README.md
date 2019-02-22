@@ -28,25 +28,19 @@ To run an nginx web server, assuming the build files are in `/some/directory/` a
 
      docker run --name nginx-data -d -p 80:80 -v /some/directory:/usr/share/nginx/html:ro nginx
 
-## How to Use
+## Tutorial/How to Use
 Coming soon
-
-## Next Steps
-
-**Develop on Web Client (requires node)**
- * cd abcd-client
- * npm i
- * npm start
 
 ## Team Members
  * Dylan Nielson
- * Adam Thomas
  * Thomas Frohwein
  * Georgi Ivanov
  * Tom Panning
  * Rebecca Waugh
  * Kat Small
  * Anna Kondylis
+ * Adam Thomas
+
 
 ## Data file documentation
 The aggregations for all possible plots are pre-calculated in the [abcdqc_batchserver](https://github.com/abcdqc/abcdqc_batchserver) and served as files from within the webserver. The file names describe what filters were applied before calculating the aggregations. For instance, the aggregations for scans made with just a GE scanner are stored in `Manufacturer-GE.json`.
@@ -63,3 +57,7 @@ The files are formatted as JSON objects where the top-level keys are the names o
             ]
         }
     }
+
+## FAIRness and Citation
+This project is listed on [FAIR Shake](https://fairshake.cloud/digital_object/6559/) and has a Zenodo DOI for citation: [![DOI](https://zenodo.org/badge/171712630.svg)](https://zenodo.org/badge/latestdoi/171712630)
+
