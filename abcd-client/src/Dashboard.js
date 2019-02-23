@@ -268,6 +268,7 @@ class Dashboard extends Component {
                                 <FormControl className={classes.formControl}>
                                     <InputLabel htmlFor='run'>Run</InputLabel>
                                     <Select
+                                        disabled={true} // Data not available
                                         value={this.state.run}
                                         onChange={this.handleChange('run')}
                                         inputProps={{
@@ -311,6 +312,7 @@ class Dashboard extends Component {
                                 <FormControl className={classes.formControl}>
                                     <InputLabel htmlFor='age'>Age</InputLabel>
                                     <Select
+                                        disabled={true} // Data not available
                                         value={this.state.age}
                                         onChange={this.handleChange('age')}
                                         inputProps={{
@@ -394,6 +396,7 @@ class Dashboard extends Component {
                         <FormControl className={classes.root}>
                             <InputLabel htmlFor='splitX'>Split X axis</InputLabel>
                             <Select
+                                disabled={true}
                                 value={this.state.splitX}
                                 onChange={this.handleChange('splitX')}
                                 inputProps={{
@@ -412,6 +415,7 @@ class Dashboard extends Component {
                         <FormControl className={classes.root}>
                             <InputLabel htmlFor='splitViolin'>Split Violin into 2 parts</InputLabel>
                             <Select
+                                disabled={true}
                                 value={this.state.splitViolin}
                                 onChange={this.handleChange('splitViolin')}
                                 inputProps={{
