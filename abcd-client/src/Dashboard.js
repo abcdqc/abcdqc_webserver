@@ -181,15 +181,9 @@ class Dashboard extends Component {
         const state = this.copyState();
 
         fetch('/data/v0.1/' + file.name + '.json', {mode: 'no-cors'})
-            .then(response => {
-                response.text().then(text => {
-                    if (!text.startsWith('{')) return;
-                    fetch('/data/v0.1/' + file.name + '.json', {mode: 'no-cors'})
-                        .then(res => res.json())
-                        .then(res => {
-                            this.processData(state, res)
-                        });
-                });
+            .then(res => res.json())
+            .then(res => {
+                this.processData(state, res)
             });
     };
 
