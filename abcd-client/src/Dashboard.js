@@ -190,7 +190,7 @@ class Dashboard extends Component {
     processData = (state, res) => {
         this.setState(state => ({
             datas: state.iqm
-                .filter(iqm => !!res[iqm])
+                .filter(iqm => !!this.state.iqm.includes(iqm) && !!res[iqm])
                 .map(iqm => ({iqm: iqm, data: [Object.assign({key: 'x split'}, res[iqm])]}))
         }));
     };
@@ -309,7 +309,7 @@ class Dashboard extends Component {
                                 <Typography className={classes.heading}>Demographics</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.details}>
-                                <FormControl className={classes.formControl}>
+                                <FormControl className={classes.formControl} disabled={true}>
                                     <InputLabel htmlFor='age'>Age</InputLabel>
                                     <Select
                                         disabled={true} // Data not available
