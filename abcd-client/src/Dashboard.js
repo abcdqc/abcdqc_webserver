@@ -120,23 +120,19 @@ class Dashboard extends Component {
     };
 
     handleChange = name => event => {
-        this.setState({ [name]: event.target.value });
-        this.load();
+        this.setState({ [name]: event.target.value }, () => this.load());
     };
 
     handleChecked = name => event => {
-        this.setState({ [name]: event.target.checked });
-        this.load();
+        this.setState({ [name]: event.target.checked }, () => this.load());
     };
 
     iqmAll = () => {
-        this.setState({iqm: optsIqm[this.state.modality].concat()});
-        this.load();
+        this.setState({iqm: optsIqm[this.state.modality].concat()}, () => this.load());
     };
 
     iqmNone = () => {
-        this.setState({iqm: []});
-        this.load();
+        this.setState({iqm: []}, () => this.load());
     };
 
     copyState = () => {
@@ -184,7 +180,8 @@ class Dashboard extends Component {
             .then(res => res.json())
             .then(res => {
                 this.processData(state, res)
-            });
+            })
+            .catch(error => {this.processData(state, {}); console.log("Fetch error: ", error)});
     };
 
     processData = (state, res) => {
@@ -432,7 +429,7 @@ class Dashboard extends Component {
                     </form>
                 </Grid>
                 <Grid item xs={12} sm={6} md={7} lg={8} xl={9}>
-                    {this.state.datas.map(d => (
+                    {this.state.datas.map(d => ( // Show an appropriate message when datas is empty
                         <Chart data={d.data} label={d.iqm} key={d.iqm}/>
                     ))}
                 </Grid>

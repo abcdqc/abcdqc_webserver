@@ -30,6 +30,7 @@ export default class Chart extends Component {
     }
     
     componentDidMount() {
+        // console.log("componentDidMount");
         // this.timerID = setInterval(
             // () => this.enableData(),
             // 2000
@@ -65,7 +66,9 @@ export default class Chart extends Component {
             .attr("y", 0 - MARGIN.left)
             .attr("x",0 - (HEIGHT / 2))
             .attr("dy", "1em")
-            .style("text-anchor", "middle")
+            .style("text-anchor", "middle");
+        // Probably bad style, but all of our rendering code is in this method so go ahead and call it
+        this.componentDidUpdate();
     }
 
     componentWillUnmount() {
@@ -78,7 +81,7 @@ export default class Chart extends Component {
 
     componentDidUpdate() {
         if (this.getData() === undefined) {
-            // Make sure the message is shown?
+            console.log("No plot data");
         } else {
             // Hide the message
             this.svg.select(".nodatamsg").remove();
