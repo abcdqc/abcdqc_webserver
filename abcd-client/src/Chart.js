@@ -147,8 +147,8 @@ export default class Chart extends Component {
         var xNum = this.getViolinXAxis(this.getData(), this.x);
 
     
-        const boxPlotX1 = this.x.bandwidth()*.25,
-            boxPlotX2 = this.x.bandwidth()*.75,
+        const boxPlotX1 = this.x.bandwidth()*.35,
+            boxPlotX2 = this.x.bandwidth()*.65,
             boxPlotWidth = boxPlotX2 - boxPlotX1;
 
         let g = this.svg
@@ -176,7 +176,7 @@ export default class Chart extends Component {
             .filter(d => d.kde !== undefined)
             .datum(d => d.kde)     // So now we are working density per density
             .style("stroke", "none")
-            .style("fill", "#69b3a2")
+            .style("fill", "#3f51b5")
             .attr("d", area()
                 // .x0(function(d){ return(xNum(-d[1])) } )
                 .x0(xNum(0))
@@ -191,7 +191,7 @@ export default class Chart extends Component {
             .filter(d => d.kde !== undefined)
             .datum(d => d.kde)
             .style("stroke", "none")
-            .style("fill", "#69b3a2")
+            .style("fill", "#3f51b5")
             // .style("fill", "red")
             .attr("d", area()
                 // .x0(d => xNum(-d[DENSITY_INDEX] / 2))
@@ -203,6 +203,7 @@ export default class Chart extends Component {
 
         // Box plots don't make sense with a split violin
         if (!this.state.splitViolin && this.state.showBoxPlot) {
+            let boxplotColor = "#888888";
             let boxG = this.svg
                 .selectAll(".box")
                 .data(this.getData())
@@ -230,7 +231,7 @@ export default class Chart extends Component {
                 .attr("y2", d => this.y(d.boxplot.quartiles[0]))
                 .attr("x1", xNum(0))
                 .attr("x2", xNum(0))
-                .style("stroke", "black");
+                .style("stroke", boxplotColor);
             boxG.append("line")
                 .attr("class", "topWhisker");
             boxplots.select(".topWhisker")
@@ -239,7 +240,7 @@ export default class Chart extends Component {
                 .attr("y2", d => this.y(d.boxplot.quartiles[1]))
                 .attr("x1", xNum(0))
                 .attr("x2", xNum(0))
-                .style("stroke", "black");
+                .style("stroke", boxplotColor);
             // Horizontal whisker
             boxG.append("line")
                 .attr("class", "bottomWhiskerBar");
@@ -249,7 +250,7 @@ export default class Chart extends Component {
                 .attr("y2", d => this.y(d.boxplot.extremes[0]))
                 .attr("x1", boxPlotX1)
                 .attr("x2", boxPlotX2)
-                .style("stroke", "black");
+                .style("stroke", boxplotColor);
             boxG.append("line")
                 .attr("class", "topWhiskerBar");
             boxplots.select(".topWhiskerBar")
@@ -258,17 +259,17 @@ export default class Chart extends Component {
                 .attr("y2", d => this.y(d.boxplot.extremes[1]))
                 .attr("x1", boxPlotX1)
                 .attr("x2", boxPlotX2)
-                .style("stroke", "black");
+                .style("stroke", boxplotColor);
             // Boxes
             boxG.append("rect")
                 .attr("class", "quartileBox");
             boxplots.select(".quartileBox")
                 .attr("class", "quartileBox")
-                .attr("x", this.x.bandwidth() * .25)
+                .attr("x", boxPlotX1)
                 .attr("y", d => this.y(d.boxplot.quartiles[1]))
                 .attr("width", boxPlotWidth)
                 .attr("height", d => this.y(d.boxplot.quartiles[0]) - this.y(d.boxplot.quartiles[1]))
-                .style("stroke", "black")
+                .style("stroke", boxplotColor)
                 .style("fill", "none")
         } else {
             this.svg
