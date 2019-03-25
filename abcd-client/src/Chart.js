@@ -9,7 +9,7 @@ const DENSITY_INDEX = 1;
 const VALUE_INDEX = 0;
 // set the dimensions and margins of the graph
 const MARGIN = {top: 10, right: 30, bottom: 30, left: 60};
-const WIDTH = 460 - MARGIN.left - MARGIN.right;
+const WIDTH = 660 - MARGIN.left - MARGIN.right;
 const HEIGHT = 400 - MARGIN.top - MARGIN.bottom;
 
 
