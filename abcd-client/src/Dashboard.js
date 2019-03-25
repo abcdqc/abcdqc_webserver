@@ -60,7 +60,7 @@ optsIqm.bold = ['dummy_trs', 'dvars_nstd',
 
 const optsManualQC = ['True', 'False'];
 
-const optsManufacturer = ['GE', 'Philips', 'Siements'];
+const optsManufacturer = ['GE', 'Philips', 'Siemens'];
 const optsManufacturerModel = {};
 optsManufacturerModel.GE = [
     'DISCOVERY_MR750',
