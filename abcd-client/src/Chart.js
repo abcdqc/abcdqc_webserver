@@ -80,7 +80,7 @@ export default class Chart extends Component {
     }
 
     componentDidUpdate() {
-        if (this.getData() === undefined) {
+        if (!this.getData()) {
             console.log("No plot data");
         } else {
             // Hide the message
@@ -121,7 +121,7 @@ export default class Chart extends Component {
 
     getViolinXAxis(data) {
         // What is the biggest value that the density estimate reach?
-        let maxNum = max(data.map(entry =>
+        let maxNum = max(data.filter(entry => entry.kde !== undefined).map(entry =>
             max(entry.kde.map(coord => coord[DENSITY_INDEX]))
         ));
 
@@ -133,7 +133,7 @@ export default class Chart extends Component {
     }
 
     getYExtent(data) {
-        let a = extent(merge(data.map(entry =>
+        let a = extent(merge(data.filter(entry => entry.kde !== undefined).map(entry =>
             extent(entry.kde.map(coord => coord[VALUE_INDEX]))
         )));
         return a;
@@ -173,6 +173,7 @@ export default class Chart extends Component {
         // Right half of violin
         all.select(".rightViolin")
             .attr("class", "rightViolin")
+            .filter(d => d.kde !== undefined)
             .datum(d => d.kde)     // So now we are working density per density
             .style("stroke", "none")
             .style("fill", "#69b3a2")
@@ -187,6 +188,7 @@ export default class Chart extends Component {
         g.append("path")
             .attr("class", "leftViolin");
         all.select(".leftViolin")
+            .filter(d => d.kde !== undefined)
             .datum(d => d.kde)
             .style("stroke", "none")
             .style("fill", "#69b3a2")
@@ -216,7 +218,8 @@ export default class Chart extends Component {
 
             let boxplots = this.svg
                 .selectAll(".box")
-                .data(this.getData());
+                .data(this.getData())
+                .filter(d => d.boxplot !== undefined);
 
             // Vertical whiskers
             boxG.append("line")

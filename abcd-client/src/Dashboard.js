@@ -114,7 +114,7 @@ class Dashboard extends Component {
         model: 'all',
         run: 'all',
         sex: 'all',
-        splitX: '',
+        splitX: 'sex',
         splitViolin: '',
         task: 'all',
     };
@@ -157,38 +157,80 @@ class Dashboard extends Component {
         function kv(key, value) {
             return key + VAL + value;
         }
-        function addKv(file, key, value) {
+        function addKv(files, key, value) {
             if (value) {
-                file.name += SEP + kv(key, value);
+                if (files.length === 0) {
+                    files.push({name: "", key: ""});
+                }
+                files = files.map(file => {
+                    if (file.name !== "") {
+                        file.name += SEP;
+                    }
+                    file.name += kv(key, value);
+                    console.log(file.name);
+                    return file;
+                });
             }
+            return files;
+        }
+        function splitKv(files, key) {
+            if (files.length === 0) {
+                files.push({name: "", key: ""});
+            }
+            files = files.map(file => [
+                {
+                    name: file.name + SEP + kv(key, "all"),
+                    title: "All"
+                }, {
+                    name: file.name + SEP + kv(key, "M"),
+                    title: "Male"
+                }, {
+                    name: file.name + SEP + kv(key, "F"),
+                    title: "Female"
+                }
+            ]).flat();
+            return files;
         }
 
         if (!this.state.modality) {
             return;
         }
-        let file = {};
+        let files = [];
 
-        file.name = kv('Modality', this.state.modality);
-        addKv(file, 'Manufacturer', this.state.manufacturer);
-        addKv(file, 'Model', this.state.model);
-        addKv(file, 'Task', this.state.task);
-        addKv(file, 'QC', this.state.manualQC);
-        addKv(file, 'Sex', this.state.sex);
+        files = addKv(files, 'Modality', this.state.modality);
+        files = addKv(files, 'Manufacturer', this.state.manufacturer);
+        files = addKv(files, 'Model', this.state.model);
+        files = addKv(files, 'Task', this.state.task);
+        files = addKv(files, 'QC', this.state.manualQC);
+        // files = addKv(file, 'Sex', this.state.sex);
+        files = splitKv(files, 'Sex');
         const state = this.copyState();
 
-        fetch('/data/v0.1/' + file.name + '.json', {mode: 'no-cors'})
+        console.log(files);
+        let fetchPromises = files.map(file =>
+            fetch('/data/v0.1/' + file.name + '.json', {mode: 'no-cors'})
+            // .then(res => ({json: res.json(), key: name}))
             .then(res => res.json())
-            .then(res => {
-                this.processData(state, res)
-            })
-            .catch(error => {this.processData(state, {}); console.log("Fetch error: ", error)});
+            .then(json => ({json: json, key: file.title}))
+            .catch(error => ({json: {}, key: file.title}))
+        )
+        Promise.all(fetchPromises).then(results => {
+            // console.log(results);
+            this.processData(state, results);
+        })
     };
 
-    processData = (state, res) => {
+    processData = (state, results) => {
+        // The results array has the different criteria as the first level and the different IQMs as the second level.
+        // The graphs need to have the IQMs as the first level and the different criteria as the second
+        let data = state.iqm
+            .filter(iqm => !!this.state.iqm.includes(iqm) && !!results.some(obj => obj.json[iqm]))
+            .map(iqm => ({
+                iqm: iqm,
+                data: results.map(res => Object.assign({key: res.key}, res.json[iqm]))
+            }));
         this.setState(state => ({
-            datas: state.iqm
-                .filter(iqm => !!this.state.iqm.includes(iqm) && !!res[iqm])
-                .map(iqm => ({iqm: iqm, data: [Object.assign({key: 'x split'}, res[iqm])]}))
+            datas: data
         }));
     };
 
@@ -328,6 +370,7 @@ class Dashboard extends Component {
                                 <FormControl className={classes.formControl}>
                                     <InputLabel htmlFor='sex'>Sex</InputLabel>
                                     <Select
+                                        disabled={true} // Split X-axis is hardcoded to Sex for now
                                         value={this.state.sex}
                                         onChange={this.handleChange('sex')}
                                         inputProps={{
@@ -404,9 +447,9 @@ class Dashboard extends Component {
                                 <MenuItem value=''>
                                     <em>No Split</em>
                                 </MenuItem>
-                                <MenuItem value='sex'>sex</MenuItem>
-                                <MenuItem value='age'>age</MenuItem>
-                                <MenuItem value='model'>model</MenuItem>
+                                <MenuItem value='sex'>Sex</MenuItem>
+                                <MenuItem value='age'>Age</MenuItem>
+                                <MenuItem value='model'>Model</MenuItem>
                             </Select>
                         </FormControl>
                         <FormControl className={classes.root}>
